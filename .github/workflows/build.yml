@@ -2,9 +2,13 @@ name: Build and Release
 
 on:
   push:
-    branches: ["main"]
-    tags:
-      - 'v*' # 监听 v 开头的 tag，例如 v0.1.0
+    branches: [ "main", "master" ]
+  tags:
+    - 'v*' # 监听 v 开头的 tag，例如 v0.1.0
+
+# 核心修复点：明确赋予 GITHUB_TOKEN 写入 Releases 的权限
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -24,7 +28,6 @@ jobs:
       - name: Build Release
         run: cargo build --release
 
-      # 如果只是普通的提交，依然保留 Artifact 供你备用下载
       - name: Upload Artifact
         if: "!startsWith(github.ref, 'refs/tags/')"
         uses: actions/upload-artifact@v4
@@ -32,7 +35,6 @@ jobs:
           name: zz-linux-amd64
           path: target/release/zz
 
-      # 如果你推送了版本号 Tag，则自动发布到 Release 页面
       - name: Publish to GitHub Releases
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
