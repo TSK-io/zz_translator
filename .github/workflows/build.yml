@@ -1,0 +1,32 @@
+name: Build Rust Translator
+
+# 触发条件：当你把代码推送到 main 或 master 分支时自动运行
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    name: Build Linux Binary
+    runs-on: ubuntu-latest # 使用 GitHub 提供的最新版 Ubuntu 服务器
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo registry and build
+        uses: Swatinem/rust-cache@v2 # 加入缓存机制，以后改代码再编译只需几秒钟
+
+      - name: Build Release
+        run: cargo build --release
+
+      - name: Upload Binary Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: zz-linux-amd64 # 下载时的压缩包名称
+          path: target/release/zz # 要上传的编译好的二进制文件路径
