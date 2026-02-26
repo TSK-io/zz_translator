@@ -3,10 +3,9 @@ name: Build and Release
 on:
   push:
     branches: [ "main", "master" ]
-  tags:
-    - 'v*' # 监听 v 开头的 tag，例如 v0.1.0
+    tags:
+      - 'v*' # 修复缩进：现在它是 push 的子节点了
 
-# 核心修复点：明确赋予 GITHUB_TOKEN 写入 Releases 的权限
 permissions:
   contents: write
 
