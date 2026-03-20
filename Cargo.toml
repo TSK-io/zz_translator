@@ -4,11 +4,7 @@ version = "0.1.2"
 edition = "2021"
 
 [dependencies]
-# 现代 HTTP 客户端，完美配合透明代理
-reqwest = { version = "0.12", features = ["json"] }
-# 异步运行时
-tokio = { version = "1", features = ["full", "rt-multi-thread"] }
-# 解析 JSON
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 serde_json = "1.0"
-# URL 编码处理空格和特殊字符
 urlencoding = "2.1"

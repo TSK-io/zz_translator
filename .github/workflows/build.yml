@@ -4,15 +4,21 @@ on:
   push:
     branches: [ "main", "master" ]
     tags:
-      - 'v*' # 修复缩进：现在它是 push 的子节点了
+      - "v*"
 
 permissions:
   contents: write
 
 jobs:
   build:
-    name: Build Linux Binary
+    name: Build Linux Binary (musl for Alpine)
     runs-on: ubuntu-latest
+
+    env:
+      CARGO_TERM_COLOR: always
+      TARGET: x86_64-unknown-linux-musl
+      CC_x86_64_unknown_linux_musl: musl-gcc
+      CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER: musl-gcc
 
     steps:
       - name: Checkout repository
@@ -20,24 +26,40 @@ jobs:
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ env.TARGET }}
+
+      - name: Install musl tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y musl-tools
 
       - name: Cache Rust dependencies
         uses: Swatinem/rust-cache@v2
 
       - name: Build Release
-        run: cargo build --release
+        run: cargo build --release --target $TARGET
+
+      - name: Strip binary
+        run: strip target/$TARGET/release/zz || true
+
+      - name: Prepare artifact
+        run: |
+          mkdir -p dist
+          cp target/$TARGET/release/zz dist/zz
+          chmod +x dist/zz
 
       - name: Upload Artifact
         if: "!startsWith(github.ref, 'refs/tags/')"
         uses: actions/upload-artifact@v4
         with:
-          name: zz-linux-amd64
-          path: target/release/zz
+          name: zz-linux-amd64-musl
+          path: dist/zz
 
       - name: Publish to GitHub Releases
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: target/release/zz
+          files: dist/zz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
