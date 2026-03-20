@@ -21,7 +21,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
 
     let client = reqwest::Client::builder()
-        .user_agent("zz/0.1.2")
+        .user_agent("zz/0.1.3")
         .build()?;
 
     let res = client.get(&trans_url).send().await?.text().await?;
